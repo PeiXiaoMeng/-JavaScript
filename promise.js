@@ -46,22 +46,44 @@ class MyPromise {
 	}
 
 	then(onFulfilled, onReject) {
-		if (this.status === STATUS.FULFILLED) {
-			onFulfilled(this.result);
-		}
+		return new MyPromise((resolve, reject) => { // 保证.then的链式调用
+			if (this.status === STATUS.FULFILLED) {
+				try {
+					const strem$ = onFulfilled(this.result);
+					resolve(strem$);
+				} catch (e) {
+					reject(e);
+				}
+			}
 
-		if (this.status === STATUS.REJECTD) {
-			onReject(this.reason);
-		}
+			if (this.status === STATUS.REJECTD) {
+				try {
+					const strem$ = onReject(this.reason);
+					resolve(strem$);
+				} catch (e) {
+					reject(e);
+				}
+			}
 
-		if (this.status === STATUS.PENDING) {
-			this.onFulfilledLists.push(() => {
-				onFulfilled(this.result);
-			})
-			this.onRejectLists.push(() => {
-				onReject(this.reason);
-			})
-		}
+			if (this.status === STATUS.PENDING) {
+				this.onFulfilledLists.push(() => {
+					try {
+						const strem$ = onFulfilled(this.result);
+						resolve(strem$);
+					} catch (e) {
+						reject(e)
+					}
+				})
+				this.onRejectLists.push(() => {
+					try {
+						const strem$ = onReject(this.reason);
+						resolve(strem$);
+					} catch (e) {
+						reject(e);
+					}
+				})
+			}
+		})
 	}
 
 }

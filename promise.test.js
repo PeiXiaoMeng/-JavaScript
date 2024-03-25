@@ -45,3 +45,43 @@ test("myPromise should call onRejected if promise is rejected", () => {
   expect(onRejectedCalled).toBe(true);
 });
 
+
+test(".then 多级调用", () => {
+  let onFulfilledCalled = false;
+  new utils.MyPromise((resolve, reject) => {
+    resolve("first");
+  }).then(
+    (res) => {
+      // console.log(res);
+      return 'second==>' + res;
+    },
+    () => {}
+  ).then(res => {
+    // console.log(res);
+    onFulfilledCalled = true;
+  })
+  expect(onFulfilledCalled).toBe(true);
+});
+
+
+test(".then 多级调用 报错case", () => {
+  let onFulfilledCalled = false;
+  new utils.MyPromise((resolve, reject) => {
+    reject("first catch");
+  }).then(
+    (res) => {
+      // console.log(res);
+      return 'second==>catch' + res;
+    },
+    (err) => {
+      // console.log(err);
+      return err;
+    }
+  ).then(res => {
+    console.log('===>res');
+    console.log(res);
+    onFulfilledCalled = true;
+  })
+  expect(onFulfilledCalled).toBe(true);
+});
+
