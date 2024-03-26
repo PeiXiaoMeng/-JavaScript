@@ -128,6 +128,28 @@ class MyPromise {
 		return processPromise;
 	}
 
+    static all(promises) {  
+        return new MyPromise((resolve, reject) => {  
+            let results = []; // 用于保存所有Promise的解析结果  
+            let count = 0; // 计数器，用于跟踪已完成解析的Promise数量  
+  
+            promises.forEach((promise, index) => {  
+                promise.then(  
+                    value => {  
+                        results[index] = value;  
+                        count++;  
+                        if (count === promises.length) {  
+                            resolve(results); // 所有Promise都成功解析，返回结果数组  
+                        }  
+                    },  
+                    reason => {  
+                        reject(reason); // 如果有任何一个Promise被拒绝，则立即拒绝新Promise  
+                    }  
+                );  
+            });  
+        });  
+    }
+    
 }
 
 module.exports = MyPromise;
