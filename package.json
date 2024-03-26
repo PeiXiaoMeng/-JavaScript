@@ -4,7 +4,7 @@
   "description": "",
   "main": "promise.js",
   "scripts": {
-    "test": "jest"
+    "test": "node promise.test"
   },
   "author": "",
   "license": "ISC",

@@ -7,9 +7,41 @@ const STATUS = {
 	/** 等待 */
 	PENDING: 'pending',
 	/** 已拒绝 */
-	REJECTD: 'rejectd',
+	REJECTD: 'rejected',
 	/** 已成功 */
 	FULFILLED: 'fulfilled',
+};
+
+
+
+const resolvePromise = (processPromise, x, resolve, reject) => {
+    if (processPromise === x) {
+    	return reject(new TypeError('Chaining cycle detected for promise #<Promise>'))
+    }
+
+    if ((typeof x === 'object' && x !== null) || typeof x === 'function')  { // object | function
+    	let called = false; // 设置开关，仅执行一次即可
+    	try {
+    		const then = x.then;
+    		if (typeof then === 'function') { // .then是function ==> Promise
+    			then.call(x, (y) => {
+    				if(called) return;
+                    called = true;
+    				resolvePromise(processPromise, y, resolve, reject)
+    			}, (e) => {
+    				reject(e)
+    			})
+    		} else {
+    			resolve(x)
+    		}
+    	} catch (e) {
+    		if(called) return;
+            called = true;
+            reject(e)
+    	}
+    } else { // number | string | undefined | boolean
+    	resolve(x)
+    }
 }
 
 
@@ -46,48 +78,58 @@ class MyPromise {
 	}
 
 	then(onFulfilled, onReject) {
-		return new MyPromise((resolve, reject) => { // 保证.then的链式调用
+		const processPromise = new MyPromise((resolve, reject) => { // 保证.then的链式调用
 			if (this.status === STATUS.FULFILLED) {
-				try {
-					const strem$ = onFulfilled(this.result);
-					resolve(strem$);
-				} catch (e) {
-					reject(e);
-				}
+				setTimeout(() => {
+					try {
+						const strem$ = onFulfilled(this.result);
+						resolvePromise(processPromise, strem$, resolve, reject);
+					} catch (e) {
+						reject(e);
+					}
+				}, 0)
 			}
 
 			if (this.status === STATUS.REJECTD) {
-				try {
-					const strem$ = onReject(this.reason);
-					resolve(strem$);
-				} catch (e) {
-					reject(e);
-				}
+				setTimeout(() => {
+					try {
+						const strem$ = onReject(this.reason);
+						resolvePromise(processPromise, strem$, resolve, reject);
+					} catch (e) {
+						reject(e);
+					}
+				}, 0)
 			}
 
 			if (this.status === STATUS.PENDING) {
 				this.onFulfilledLists.push(() => {
-					try {
-						const strem$ = onFulfilled(this.result);
-						resolve(strem$);
-					} catch (e) {
-						reject(e)
-					}
+					setTimeout(() => {
+						try {
+							const strem$ = onFulfilled(this.result);
+							resolvePromise(processPromise, strem$, resolve, reject);
+						} catch (e) {
+							reject(e)
+						}
+					}, 0)
 				})
 				this.onRejectLists.push(() => {
-					try {
-						const strem$ = onReject(this.reason);
-						resolve(strem$);
-					} catch (e) {
-						reject(e);
-					}
+					setTimeout(() => {
+						try {
+							const strem$ = onReject(this.reason);
+							resolvePromise(processPromise, strem$, resolve, reject);
+						} catch (e) {
+							reject(e);
+						}
+					}, 0)
 				})
 			}
 		})
+
+		return processPromise;
 	}
 
 }
 
-module.exports = {
-	MyPromise
-};
+module.exports = MyPromise;
+
+
