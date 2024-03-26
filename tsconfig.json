@@ -1,0 +1,16 @@
+{  
+  "compilerOptions": {  
+    "target": "esnext",  
+    "module": "esnext",  
+    "strict": true,  
+    // "jsx": "react", // 如果你在使用 React，请取消注释这一行  
+    "importHelpers": true,  
+    "moduleResolution": "node",  
+    // "experimentalDecorators": true, // 如果你在使用装饰器，请取消注释这一行  
+    "esModuleInterop": true,  
+    "skipLibCheck": true,  
+    "forceConsistentCasingInFileNames": true  
+  },  
+  "include": ["src/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],  
+  "exclude": ["node_modules"]  
+}
